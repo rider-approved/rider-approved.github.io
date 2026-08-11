@@ -1,0 +1,73 @@
+---
+import { Picture } from 'astro:assets';
+import { IMAGE_PROFILES, type ImageProfile } from '../config/images';
+import { getCategory } from '../config/catalog';
+import { t } from '../i18n/index';
+
+interface Props {
+  image?: {
+    src: ImageMetadata;
+    alt: string;
+    kind: 'product' | 'lifestyle';
+    position?: string;
+  };
+  profile: ImageProfile;
+  sectionSlug: string;
+  categorySlug: string;
+  class?: string;
+}
+
+const { image, profile, sectionSlug, categorySlug, class: className = '' } = Astro.props;
+const { width, height } = IMAGE_PROFILES[profile];
+const icon = getCategory(sectionSlug, categorySlug)?.icon ?? '';
+const showLabel = profile === 'hero';
+---
+
+<div class:list={['product-image relative overflow-hidden bg-surface rounded-card', className]}>
+  {
+    image ? (
+      <Picture
+        src={image.src}
+        alt={image.alt}
+        width={width}
+        height={height}
+        widths={[width / 2, width]}
+        formats={['avif', 'webp']}
+        pictureAttributes={{ class: 'block w-full h-full' }}
+        class:list={[
+          'w-full h-full',
+          image.kind === 'product' ? 'object-contain p-[8%]' : 'object-cover',
+        ]}
+        style={image.position ? `object-position: ${image.position}` : undefined}
+      />
+    ) : (
+      <div
+        class="product-image-placeholder absolute inset-0 flex flex-col items-center justify-center gap-2.5 border border-line rounded-card"
+      >
+        <div class="placeholder-hatch absolute inset-0" aria-hidden="true"></div>
+        <svg
+          viewBox="0 0 64 64"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="4"
+          class="relative w-[34%] h-auto text-line"
+          aria-hidden="true"
+          set:html={icon}
+        />
+        {showLabel && (
+          <span class="relative text-micro uppercase font-bold text-muted">{t('product.noPhoto')}</span>
+        )}
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .placeholder-hatch {
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgb(128 128 128 / 4%) 0 2px,
+      transparent 2px 9px
+    );
+  }
+</style>

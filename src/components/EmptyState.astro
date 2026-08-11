@@ -1,0 +1,32 @@
+---
+import { t } from '../i18n/index';
+import { getCategory } from '../config/catalog';
+
+interface Props {
+  sectionSlug: string;
+  categorySlug: string;
+  categoryLabel: string;
+}
+const { sectionSlug, categorySlug, categoryLabel } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const icon = getCategory(sectionSlug, categorySlug)?.icon ?? '';
+---
+
+<div class="empty-state border border-dashed border-line rounded-card overflow-hidden text-center">
+  <div class="py-12 px-7">
+    <svg
+      viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="4"
+      class="w-12 h-12 mx-auto mb-3 text-line" aria-hidden="true" set:html={icon}
+    />
+    <h2 class="text-h3 font-semibold text-primary mb-2">
+      {t('empty.title').replace('{category}', categoryLabel.toLowerCase())}
+    </h2>
+    <p class="text-body-sm text-muted max-w-md mx-auto mb-5">{t('empty.body')}</p>
+    <a
+      href={`${base}community`}
+      class="inline-flex items-center justify-center min-h-tap px-5 border border-line rounded-card text-label uppercase font-bold font-display text-primary hover:border-accent transition-colors"
+    >
+      {t('empty.cta')}
+    </a>
+  </div>
+</div>

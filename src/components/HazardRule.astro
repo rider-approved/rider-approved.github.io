@@ -1,0 +1,27 @@
+---
+interface Props {
+  /** `thick` (10px) caps the hero; `thin` (5px) divides sections. */
+  size?: 'thick' | 'thin';
+  class?: string;
+}
+const { size = 'thin', class: className = '' } = Astro.props;
+---
+
+<div
+  class:list={['hazard-rule', size === 'thick' ? 'h-2.5' : 'h-[5px]', className]}
+  aria-hidden="true"
+>
+</div>
+
+<style>
+  /* The alternating band is `transparent`, not `var(--bg)`: this sits on four
+     different surfaces, including the sticky bar whose background is a
+     translucent overlay. Hard-coding --bg would show a seam there. */
+  .hazard-rule {
+    background: repeating-linear-gradient(
+      135deg,
+      var(--accent-dim) 0 10px,
+      transparent 10px 20px
+    );
+  }
+</style>

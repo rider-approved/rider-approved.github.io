@@ -1,0 +1,40 @@
+---
+interface Props {
+  summary: string;
+  open?: boolean;
+  class?: string;
+}
+const { summary, open = false, class: className = '' } = Astro.props;
+---
+
+<details class:list={['disclosure border-b border-line-subtle', className]} open={open}>
+  <summary
+    class="disclosure-summary flex items-center justify-between gap-4 py-4 cursor-pointer list-none min-h-tap select-none"
+  >
+    <span class="text-body-sm font-semibold text-primary">{summary}</span>
+    <span
+      class="disclosure-icon w-7 h-7 shrink-0 border border-line rounded-chip flex items-center justify-center text-accent-text font-mono text-lg leading-none"
+      aria-hidden="true">+</span
+    >
+  </summary>
+  <div class="disclosure-body pb-5">
+    <slot />
+  </div>
+</details>
+
+<style>
+  /* The +/− glyph is set by the script below — no CSS content rules, so the
+     two mechanisms cannot disagree. */
+  .disclosure-summary::-webkit-details-marker { display: none; }
+</style>
+
+<script>
+  // Swap the +/− glyph. Native <details> already handles open/closed state.
+  document.querySelectorAll<HTMLDetailsElement>('.disclosure').forEach((el) => {
+    const icon = el.querySelector<HTMLElement>('.disclosure-icon');
+    if (!icon) return;
+    const sync = () => { icon.textContent = el.open ? '−' : '+'; };
+    sync();
+    el.addEventListener('toggle', sync);
+  });
+</script>

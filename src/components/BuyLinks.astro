@@ -1,0 +1,84 @@
+---
+import { t } from '../i18n/index';
+import { formatBRL, isStale, formatCheckDate } from '../lib/price';
+
+interface BuyLink {
+  label: string;
+  url: string;
+  price?: number;
+  checkedAt?: Date;
+  featured: boolean;
+}
+
+interface Props { links: BuyLink[] }
+
+const { links } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const ordered = [...links].sort((a, b) => Number(b.featured) - Number(a.featured));
+---
+
+{
+  ordered.length > 0 && (
+    <section id="comprar" class="scroll-mt-4">
+      <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('product.whereToBuy')}</h2>
+
+      {ordered.map((link) => {
+        const stale = isStale(link.checkedAt);
+        const showPrice = link.price !== undefined && link.checkedAt !== undefined;
+        return (
+          <div
+            class:list={[
+              'buy-link flex items-center justify-between gap-3.5 flex-wrap border rounded-card px-4 py-3.5 mb-2.5',
+              link.featured ? 'border-accent bg-accent/5' : 'border-line',
+            ]}
+            data-stale={String(stale)}
+          >
+            <div>
+              <p class="text-body-sm font-semibold text-primary">{link.label}</p>
+              {link.checkedAt && (
+                <p class:list={['font-mono text-[0.78rem] mt-1', stale ? 'text-warn' : 'text-muted']}>
+                  {stale
+                    ? t('price.mayHaveChanged').replace('{date}', formatCheckDate(link.checkedAt))
+                    : t('price.checkedOn').replace('{date}', formatCheckDate(link.checkedAt))}
+                </p>
+              )}
+            </div>
+            <div class="flex items-center gap-3.5">
+              {showPrice && (
+                <div class="text-right">
+                  <span
+                    class:list={[
+                      'buy-price font-mono text-[1.19rem] font-bold',
+                      stale ? 'text-muted line-through' : 'text-primary',
+                    ]}
+                  >
+                    {formatBRL(link.price!)}
+                  </span>
+                  {stale && <span class="block text-[0.78rem] text-warn">{t('price.checkOnSite')}</span>}
+                </div>
+              )}
+              <a
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer sponsored"
+                class:list={[
+                  'inline-flex items-center justify-center min-h-tap px-5 rounded-card text-label uppercase font-extrabold font-display whitespace-nowrap transition-opacity hover:opacity-90',
+                  link.featured ? 'bg-accent text-accent-ink' : 'border border-line text-primary',
+                ]}
+              >
+                {link.featured ? t('product.buy') : t('product.view')}
+              </a>
+            </div>
+          </div>
+        );
+      })}
+
+      <p class="affiliate-disclosure text-[0.8125rem] leading-relaxed text-muted bg-accent/[0.06] border border-accent/20 rounded-card px-3 py-2.5">
+        {t('disclosure.inline')}{' '}
+        <a href={`${base}transparency`} class="text-accent-text underline underline-offset-2">
+          {t('disclosure.learnMore')}
+        </a>
+      </p>
+    </section>
+  )
+}

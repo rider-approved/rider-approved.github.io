@@ -1,0 +1,72 @@
+---
+import Disclosure from './Disclosure.astro';
+import { t } from '../i18n/index';
+
+interface Props {
+  moreInfo?: {
+    fullSpecs?: { label: string; value: string }[];
+    manual?: { label: string; url: string }[];
+    compatibility?: string;
+    warranty?: string;
+    extra: { title: string; body: string }[];
+  };
+}
+
+const { moreInfo } = Astro.props;
+
+// `extra` is guaranteed to be an array whenever `moreInfo` is present:
+// the content schema declares `.default([])`, so Zod fills it during
+// content validation at build time. Spreading it is safe without a
+// fallback — and a fallback here would mask a schema regression if
+// that default were ever removed.
+const sections = moreInfo
+  ? [
+      moreInfo.fullSpecs?.length ? { key: 'moreInfo.fullSpecs', type: 'specs' as const, specs: moreInfo.fullSpecs } : null,
+      moreInfo.manual?.length ? { key: 'moreInfo.manual', type: 'links' as const, links: moreInfo.manual } : null,
+      moreInfo.compatibility ? { key: 'moreInfo.compatibility', type: 'text' as const, text: moreInfo.compatibility } : null,
+      moreInfo.warranty ? { key: 'moreInfo.warranty', type: 'text' as const, text: moreInfo.warranty } : null,
+      ...moreInfo.extra.map((e) => ({ key: null, title: e.title, type: 'text' as const, text: e.body })),
+    ].filter(Boolean)
+  : [];
+---
+
+{
+  sections.length > 0 && (
+    <section class="more-info">
+      <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('product.moreInfo')}</h2>
+      <div class="border-t border-line-subtle">
+        {sections.map((s: any, i: number) => (
+          <Disclosure summary={s.key ? t(s.key) : s.title} open={i === 0}>
+            {s.type === 'specs' && (
+              <table class="w-full font-mono">
+                {s.specs.map((row: { label: string; value: string }) => (
+                  <tr class="border-b border-line-subtle">
+                    <td class="py-2.5 text-micro uppercase text-muted">{row.label}</td>
+                    <td class="py-2.5 text-[0.85rem] font-semibold text-primary text-right">{row.value}</td>
+                  </tr>
+                ))}
+              </table>
+            )}
+            {s.type === 'links' && (
+              <ul>
+                {s.links.map((l: { label: string; url: string }) => (
+                  <li class="py-1">
+                    <a
+                      href={l.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center min-h-tap text-body-sm text-accent-text font-semibold"
+                    >
+                      {l.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {s.type === 'text' && <p class="text-body-sm text-body">{s.text}</p>}
+          </Disclosure>
+        ))}
+      </div>
+    </section>
+  )
+}

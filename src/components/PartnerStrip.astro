@@ -1,0 +1,31 @@
+---
+import { Image } from 'astro:assets';
+import { partners } from '../config/partners';
+import { t } from '../i18n/index';
+
+// The name sits beside the mark rather than the mark standing alone: a channel
+// avatar is often a badge with its name set around the rim, which at this size
+// is an unreadable smudge. The image's alt is empty because that visible text
+// already gives the link its accessible name.
+---
+
+{
+  partners.length > 0 && (
+    <div class="partner-strip flex flex-col items-center gap-2.5">
+      <p class="text-micro uppercase font-bold text-muted">{t('partner.inPartnership')}</p>
+      <div class="flex items-center gap-4 flex-wrap justify-center">
+        {partners.map((p) => (
+          <a
+            href={p.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-2 text-body-sm text-muted hover:text-primary transition-colors"
+          >
+            <Image src={p.logo} alt="" width={36} height={36} class="rounded-full" />
+            <span class="font-display font-semibold">{p.name}</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  )
+}

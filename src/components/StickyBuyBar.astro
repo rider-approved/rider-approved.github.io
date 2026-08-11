@@ -1,0 +1,69 @@
+---
+import HazardRule from './HazardRule.astro';
+import { t } from '../i18n/index';
+import { formatBRL, isStale, formatCheckDate } from '../lib/price';
+
+interface Props {
+  title: string;
+  price?: number;
+  checkedAt?: Date;
+}
+const { title, price, checkedAt } = Astro.props;
+const showPrice = price !== undefined && checkedAt !== undefined && !isStale(checkedAt);
+---
+
+<div
+  class="sticky-buy-bar fixed bottom-0 inset-x-0 z-40 bg-bg/95 backdrop-blur"
+  data-visible="false"
+>
+  <HazardRule />
+  <div class="max-w-6xl mx-auto flex items-center justify-between gap-4 px-4 py-3">
+    <span class="text-body-sm font-semibold text-primary truncate">
+      {title}
+      {showPrice && (
+        <small class="block font-mono text-[0.75rem] font-normal text-muted">
+          {formatBRL(price!)} · {formatCheckDate(checkedAt!)}
+        </small>
+      )}
+    </span>
+    <a
+      href="#comprar"
+      class="inline-flex items-center justify-center min-h-tap px-6 rounded-card bg-accent text-accent-ink text-label uppercase font-extrabold font-display whitespace-nowrap"
+    >
+      {t('product.buy')} &darr;
+    </a>
+  </div>
+</div>
+
+<style>
+  .sticky-buy-bar {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .sticky-buy-bar[data-visible='true'] {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .sticky-buy-bar { transition: transform 200ms ease, opacity 200ms ease; }
+  }
+</style>
+
+<script>
+  const bar = document.querySelector<HTMLElement>('.sticky-buy-bar');
+  const buy = document.getElementById('comprar');
+  if (bar && buy) {
+    // Visible only while the buy block is off-screen above — it exists to reach
+    // an action you cannot see. On short pages it never appears, which is correct.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        const passed = entry.boundingClientRect.top < 0 && !entry.isIntersecting;
+        bar.dataset.visible = String(passed);
+      },
+      { threshold: 0 }
+    );
+    observer.observe(buy);
+  }
+</script>

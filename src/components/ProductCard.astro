@@ -1,0 +1,91 @@
+---
+import ProductImage from './ProductImage.astro';
+import { t } from '../i18n/index';
+import { parseProductId, type Product } from '../lib/catalog';
+import { formatBRL, isStale, formatCheckDate } from '../lib/price';
+
+interface Props {
+  product: Product;
+  variant: 'row' | 'compact';
+}
+
+const { product, variant } = Astro.props;
+const { section, category, product: slug } = parseProductId(product.id);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const href = `${base}${section}/${category}/${slug}/`;
+
+const featured =
+  product.data.buyLinks.find((l) => l.featured) ?? product.data.buyLinks[0];
+const showPrice = featured?.price !== undefined && !isStale(featured.checkedAt);
+
+const { verdict } = product.data;
+const reviewCount = product.data.testimonials.length + 1;
+const metaParts = [
+  verdict.km ? `${verdict.km.toLocaleString('pt-BR')} ${t('common.km')}` : null,
+  product.data.testimonials.length
+    ? `${reviewCount} ${t(reviewCount === 1 ? 'common.review' : 'common.reviews')}`
+    : null,
+].filter(Boolean);
+---
+
+<article class="product-card" data-variant={variant}>
+  {
+    variant === 'row' ? (
+      <div class="grid grid-cols-1 sm:grid-cols-[210px_1fr] gap-5 py-6 border-b border-line-subtle">
+        <a href={href} class="block" tabindex="-1" aria-hidden="true">
+          <ProductImage
+            image={product.data.images[0]}
+            profile="row"
+            sectionSlug={section}
+            categorySlug={category}
+            class="aspect-[4/3]"
+          />
+        </a>
+        <div>
+          {product.data.brand && (
+            <p class="text-micro uppercase font-bold text-accent-text">{product.data.brand}</p>
+          )}
+          <h3 class="text-h3 font-bold text-primary mt-1.5 mb-2 tracking-tight">
+            <a href={href} class="hover:text-accent-text transition-colors">{product.data.title}</a>
+          </h3>
+          {metaParts.length > 0 && (
+            <p class="font-mono text-meta text-muted mb-2.5">{metaParts.join(' · ')}</p>
+          )}
+          <p class="text-body-sm text-body mb-3.5">&ldquo;{verdict.text}&rdquo;</p>
+          <div class="flex items-center gap-4 flex-wrap">
+            {showPrice && (
+              <span class="font-mono text-[1.06rem] font-bold text-primary">
+                {formatBRL(featured.price!)}
+                <small class="block text-[0.72rem] font-normal text-muted">
+                  {t('price.checkedOn').replace('{date}', formatCheckDate(featured.checkedAt!))}
+                </small>
+              </span>
+            )}
+            <a href={href} class="text-label uppercase font-bold text-accent-text">
+              {t('product.readFull')} &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+    ) : (
+      <a
+        href={href}
+        class="block bg-surface border border-line rounded-card overflow-hidden hover:border-accent transition-colors"
+      >
+        <ProductImage
+          image={product.data.images[0]}
+          profile="compact"
+          sectionSlug={section}
+          categorySlug={category}
+          class="aspect-[4/3] rounded-none border-b-2 border-accent"
+        />
+        <div class="p-4">
+          <p class="text-micro uppercase font-bold text-accent-text">{t(`category.${category}`)}</p>
+          <h3 class="text-body-sm font-semibold text-primary mt-1.5 leading-snug">
+            {product.data.title}
+          </h3>
+        </div>
+      </a>
+    )
+  }
+</article>

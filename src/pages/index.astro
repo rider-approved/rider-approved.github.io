@@ -1,0 +1,94 @@
+---
+import Layout from '../layouts/Layout.astro';
+import HazardRule from '../components/HazardRule.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { catalog } from '../config/catalog';
+import { getStats, getLatest, countsByCategory } from '../lib/catalog';
+import { t } from '../i18n/index';
+
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const stats = await getStats();
+const latest = await getLatest(3);
+
+const sections = await Promise.all(
+  catalog.map(async (s) => {
+    const counts = await countsByCategory(s.slug);
+    const products = Object.values(counts).reduce((a, b) => a + b, 0);
+    return { ...s, products, categories: s.categories.length };
+  })
+);
+---
+
+<Layout title={t('site.name')}>
+  <HazardRule size="thick" />
+  <section class="text-center py-12">
+    <p class="text-micro uppercase font-bold text-accent-text">{t('site.tagline')}</p>
+    <h1 class="text-display font-bold text-primary mt-3.5 mb-3">{t('site.name')}</h1>
+    <p class="text-[1.16rem] leading-relaxed text-body max-w-lg mx-auto mb-7">{t('site.promise')}</p>
+
+    <div class="flex gap-3 justify-center flex-wrap">
+      {
+        catalog.map((s, i) => (
+          <a
+            href={`${base}${s.slug}/`}
+            class:list={[
+              'inline-flex items-center justify-center min-h-tap px-6 rounded-card text-label uppercase font-extrabold transition-opacity hover:opacity-90',
+              i === 0 ? 'bg-accent text-accent-ink' : 'border border-line text-primary',
+            ]}
+          >
+            {t(s.labelKey)}
+          </a>
+        ))
+      }
+    </div>
+
+    <div class="site-stats flex justify-center gap-10 flex-wrap mt-8">
+      {
+        [
+          { value: stats.products, label: t('stats.products') },
+          { value: stats.reviews, label: t('stats.reviews') },
+          { value: stats.categories, label: t('stats.categories') },
+        ].map((s) => (
+          <div>
+            <b class="block font-mono text-[1.6rem] font-bold text-accent-text">{s.value}</b>
+            <span class="stat-label text-micro uppercase text-muted">{s.label}</span>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <HazardRule />
+
+  <section class="my-8">
+    <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('home.explore')}</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {
+        sections.map((s) => (
+          <a
+            href={`${base}${s.slug}/`}
+            class="block bg-surface border border-line border-l-[3px] border-l-accent rounded-card px-6 py-5 hover:border-accent transition-colors"
+          >
+            <b class="block text-h3 font-bold text-primary mb-1.5">{t(s.labelKey)}</b>
+            <span class="text-meta text-muted">
+              {s.products} {t('common.products')} · {s.categories} {t('common.categories')}
+            </span>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  {
+    latest.length > 0 && (
+      <section>
+        <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('home.latest')}</h2>
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          {latest.map((p) => (
+            <ProductCard product={p} variant="compact" />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</Layout>

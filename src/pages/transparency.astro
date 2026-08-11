@@ -1,0 +1,50 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { t } from '../i18n/index';
+---
+
+<Layout title={t('nav.transparency')}>
+  <article class="max-w-[720px] mx-auto py-6 prose prose-neutral dark:prose-invert prose-p:text-body-base prose-li:text-body-base prose-p:text-body prose-li:text-body prose-headings:text-primary">
+    <h1 class="text-h1 font-bold">Transparência</h1>
+
+    <h2>Como o RiderApproved se sustenta</h2>
+    <p>
+      Alguns links para lojas nesta página são links de afiliado. Se você comprar por eles, recebemos
+      uma comissão da loja — sem nenhum custo extra pra você. É assim que o site se paga.
+    </p>
+
+    <h2>Comissão não compra opinião</h2>
+    <p>
+      A comissão não influencia nossas análises nem a ordem em que os produtos aparecem. Um produto
+      ruim continua sendo descrito como ruim, mesmo que a comissão dele seja maior. Quando um produto
+      não vale a pena, dizemos isso.
+    </p>
+
+    <h2>Como escolhemos o que testar</h2>
+    <p>
+      Só publicamos produtos que algum piloto usou de verdade, na moto dele, por tempo suficiente pra
+      ter opinião formada. Cada análise traz quem testou, em qual moto e quantos quilômetros rodou.
+      Não aceitamos produto em troca de análise positiva.
+    </p>
+
+    <h2>Sobre os preços</h2>
+    <p>
+      Os preços são conferidos manualmente e mostram a data da última verificação. Preço de moto muda
+      toda hora — quando a verificação está velha, avisamos e mandamos você conferir direto na loja em
+      vez de mostrar um número que pode estar errado.
+    </p>
+
+    <h2>Parcerias</h2>
+    <p>
+      Quando um vídeo vem de um canal parceiro, isso aparece creditado junto ao vídeo. Nossas parcerias
+      com canais são editoriais: não há pagamento, produto grátis nem promoção paga em nenhuma das
+      direções. Se isso mudar, esta página muda junto.
+    </p>
+
+    <h2>Falar com a gente</h2>
+    <p>
+      Achou um preço errado, um link quebrado ou discorda de uma análise? Fala com a gente pela
+      <a href={`${import.meta.env.BASE_URL.replace(/\/?$/, '/')}community`}>página da comunidade</a>.
+    </p>
+  </article>
+</Layout>

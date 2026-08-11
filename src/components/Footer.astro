@@ -1,0 +1,17 @@
+---
+import { t } from '../i18n/index';
+import PartnerStrip from './PartnerStrip.astro';
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+---
+
+<footer class="border-t border-line mt-16 py-8">
+  <div class="max-w-6xl mx-auto px-4 flex flex-col gap-4 items-center text-center">
+    <nav class="flex gap-5 text-meta">
+      <a href={`${base}community`} class="text-muted hover:text-primary transition-colors">{t('nav.community')}</a>
+      <a href={`${base}transparency`} class="text-muted hover:text-primary transition-colors">{t('nav.transparency')}</a>
+    </nav>
+    <PartnerStrip />
+    <p class="text-muted text-meta">{t('site.name')} — {t('site.tagline')}</p>
+    <a href="https://github.com/fpontef/" target="_blank" rel="noopener noreferrer" class="text-muted text-meta hover:text-primary transition-colors">{t('footer.madeBy')}</a>
+  </div>
+</footer>

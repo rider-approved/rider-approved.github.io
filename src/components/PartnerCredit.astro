@@ -1,0 +1,26 @@
+---
+import { Image } from 'astro:assets';
+import { getPartner } from '../config/partners';
+import { t } from '../i18n/index';
+
+interface Props {
+  partnerKey?: string;
+}
+
+const { partnerKey } = Astro.props;
+const partner = partnerKey ? getPartner(partnerKey) : undefined;
+---
+
+{
+  partner && (
+    <a
+      href={partner.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="partner-credit inline-flex items-center gap-2.5 mt-3 text-meta text-muted hover:text-primary transition-colors"
+    >
+      <Image src={partner.logo} alt="" width={24} height={24} class="rounded-full" />
+      <span>{t('partner.videoBy')} <strong class="font-semibold">{partner.name}</strong></span>
+    </a>
+  )
+}

@@ -1,0 +1,21 @@
+---
+interface Props {
+  trail: { label: string; href?: string }[];
+}
+const { trail } = Astro.props;
+---
+
+<nav class="text-meta text-muted py-4" aria-label="Breadcrumb">
+  {
+    trail.map((item, i) => (
+      <>
+        {i > 0 && <span class="mx-1.5">&rsaquo;</span>}
+        {item.href ? (
+          <a href={item.href} class="hover:text-primary transition-colors">{item.label}</a>
+        ) : (
+          <span class="text-accent-text font-semibold">{item.label}</span>
+        )}
+      </>
+    ))
+  }
+</nav>

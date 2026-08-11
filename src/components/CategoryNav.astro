@@ -1,0 +1,77 @@
+---
+import CategoryChip from './CategoryChip.astro';
+import { getSection } from '../config/catalog';
+import { countsByCategory } from '../lib/catalog';
+import { t } from '../i18n/index';
+
+interface Props {
+  sectionSlug: string;
+  currentCategory?: string;
+}
+
+const { sectionSlug, currentCategory } = Astro.props;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+
+const section = getSection(sectionSlug);
+const counts = await countsByCategory(sectionSlug);
+
+// Populated first, then empty — a reader should never open four dead categories in a row.
+const ordered = [...(section?.categories ?? [])].sort((a, b) => {
+  const emptiness = Number(counts[a.slug] === 0) - Number(counts[b.slug] === 0);
+  return emptiness !== 0 ? emptiness : 0;
+});
+
+// Show up to 9. Never hide fewer than 3: a control that conceals one or two
+// items costs more attention than the items it hides, which is what a
+// threshold of 8 produced at the real count of 9.
+const VISIBLE = 9;
+const MIN_HIDDEN = 3;
+const overflowing = ordered.length - VISIBLE >= MIN_HIDDEN;
+const head = overflowing ? ordered.slice(0, VISIBLE) : ordered;
+const tail = overflowing ? ordered.slice(VISIBLE) : [];
+---
+
+<nav class="category-nav border-t border-line-subtle" aria-label={t('nav.categories')}>
+  <div class="max-w-6xl mx-auto px-4 py-3">
+    <!-- Chips are never nested inside <summary>: a click there toggles the
+         disclosure instead of following the link. -->
+    <div class="flex flex-wrap gap-1.5">
+      {
+        head.map((c) => (
+          <CategoryChip
+            href={`${base}${sectionSlug}/${c.slug}/`}
+            label={t(c.labelKey)}
+            count={counts[c.slug] ?? 0}
+            active={c.slug === currentCategory}
+          />
+        ))
+      }
+    </div>
+
+    {
+      tail.length > 0 && (
+        <details class="mt-1.5">
+          <summary
+            class="category-more inline-flex items-center min-h-tap px-3.5 rounded-card text-body-sm font-bold text-accent-text border border-dashed border-accent/45 cursor-pointer list-none"
+          >
+            {t(tail.length === 1 ? 'nav.showAll.one' : 'nav.showAll.other').replace('{n}', String(tail.length))}
+          </summary>
+          <div class="flex flex-wrap gap-1.5 mt-1.5">
+            {tail.map((c) => (
+              <CategoryChip
+                href={`${base}${sectionSlug}/${c.slug}/`}
+                label={t(c.labelKey)}
+                count={counts[c.slug] ?? 0}
+                active={c.slug === currentCategory}
+              />
+            ))}
+          </div>
+        </details>
+      )
+    }
+  </div>
+</nav>
+
+<style>
+  .category-nav summary::-webkit-details-marker { display: none; }
+</style>

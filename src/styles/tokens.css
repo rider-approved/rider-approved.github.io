@@ -1,0 +1,33 @@
+/* src/styles/tokens.css — the single source of design truth. */
+
+/* Light theme (default) */
+:root {
+  --bg: #e4dfd6;
+  --surface: #f2eee8;
+  --line: #cfc7b8;
+  --line-subtle: #dcd5c9;
+  --accent: #f5b301;
+  --accent-text: #745200;
+  --accent-ink: #14161a;
+  --accent-dim: #b8891a;
+  --text: #14161a;
+  --text-body: #343b41;
+  --text-muted: #4f5a61;
+  --warn: #8f4e0e;
+}
+
+/* Dark theme */
+:root[data-theme="dark"] {
+  --bg: #16191c;
+  --surface: #1e2226;
+  --line: #2e343a;
+  --line-subtle: #262b30;
+  --accent: #f5b301;
+  --accent-text: #f5b301;
+  --accent-ink: #14161a;
+  --accent-dim: #b28509;
+  --text: #f4f6f8;
+  --text-body: #d4dae0;
+  --text-muted: #9aa4ad;
+  --warn: #e0913a;
+}

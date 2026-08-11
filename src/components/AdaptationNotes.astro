@@ -1,0 +1,16 @@
+---
+interface Props {
+  notes: string[];
+}
+const { notes } = Astro.props;
+---
+
+{
+  notes.length > 0 && (
+    <ul class="adaptation-notes list-disc pl-5">
+      {notes.map((note) => (
+        <li class="text-body-sm text-body mb-2">{note}</li>
+      ))}
+    </ul>
+  )
+}

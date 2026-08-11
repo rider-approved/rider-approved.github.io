@@ -1,0 +1,20 @@
+---
+interface Props {
+  href: string;
+  label: string;
+  count: number;
+  active: boolean;
+}
+const { href, label, count, active } = Astro.props;
+---
+
+<a
+  href={href}
+  class:list={[
+    'category-chip inline-flex items-center gap-1.5 min-h-tap px-3.5 rounded-card text-body-sm transition-colors font-display',
+    active ? 'bg-accent text-accent-ink font-bold' : 'border border-line text-muted hover:text-primary',
+  ]}
+>
+  {label}
+  <span class="chip-count font-mono text-[0.75rem] opacity-70">{count}</span>
+</a>

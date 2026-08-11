@@ -1,0 +1,74 @@
+/* src/styles/global.css */
+/* Self-hosted — no third-party font requests. Weights limited to those in use:
+   Inter 400/500/600/700/800 (800 is used by buy buttons), Barlow Condensed 600/700.
+   The `latin-` entrypoints ship only the latin subset in woff2. The bare `400.css`
+   form pulls cyrillic, greek and vietnamese too, plus a legacy woff of each — 41
+   @font-face rules and 1.4 MB of build output for a pt-BR site. Browsers never
+   downloaded those (unicode-range gates them), so this is artifact size, not page
+   weight. Add a subset back here if the site ever ships a non-latin language. */
+@import '@fontsource/inter/latin-400.css';
+@import '@fontsource/inter/latin-500.css';
+@import '@fontsource/inter/latin-600.css';
+@import '@fontsource/inter/latin-700.css';
+@import '@fontsource/inter/latin-800.css';
+@import '@fontsource/barlow-condensed/latin-600.css';
+@import '@fontsource/barlow-condensed/latin-700.css';
+@import './tokens.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Headings take the condensed face everywhere, including headings produced by
+   markdown in review bodies. Applying it here rather than as a class on each
+   heading keeps the two from drifting apart across thirteen files. */
+@layer base {
+  h1, h2, h3 {
+    font-family: theme('fontFamily.display');
+  }
+}
+
+.icon-sun { display: none; }
+:root[data-theme='dark'] .icon-sun { display: inline; }
+:root[data-theme='dark'] .icon-moon { display: none; }
+
+body {
+  background-color: var(--bg);
+  color: var(--text-body);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+img { max-width: 100%; height: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Grain sits on chrome only. It may sit behind display text at 20px or larger
+   (the wordmark), never behind body copy, meta text, or anything smaller — a 5%
+   noise layer shifts luminance ~2-3%, which is negligible against large-text
+   pairs but erodes the tighter small-text ones. Keeping small-text surfaces flat
+   is what keeps check-contrast.mjs describing what actually renders. */
+.grain {
+  position: relative;
+}
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+}
+
+/* White noise is invisible on a light surface, so the light theme inverts it and
+   needs lower opacity to read as texture rather than dirt. */
+:root:not([data-theme='dark']) .grain::after {
+  filter: invert(1);
+  opacity: 0.035;
+}

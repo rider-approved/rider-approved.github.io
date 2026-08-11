@@ -1,0 +1,159 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../../../layouts/Layout.astro';
+import Breadcrumb from '../../../../components/Breadcrumb.astro';
+import ProductImage from '../../../../components/ProductImage.astro';
+import BuyLinks from '../../../../components/BuyLinks.astro';
+import MoreInfo from '../../../../components/MoreInfo.astro';
+import YoutubeEmbed from '../../../../components/YoutubeEmbed.astro';
+import StickyBuyBar from '../../../../components/StickyBuyBar.astro';
+import ProductCard from '../../../../components/ProductCard.astro';
+import SpecTable from '../../../../components/SpecTable.astro';
+import AdaptationNotes from '../../../../components/AdaptationNotes.astro';
+import { getAllProducts, getProductsIn, parseProductId } from '../../../../lib/catalog';
+import { t } from '../../../../i18n/index';
+
+export async function getStaticPaths() {
+  const products = await getAllProducts();
+  return products.map((p) => {
+    const { section, category, product } = parseProductId(p.id);
+    return { params: { section, category, product }, props: { entry: p } };
+  });
+}
+
+const { entry } = Astro.props;
+const { section, category } = parseProductId(entry.id);
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const { Content } = await render(entry);
+const d = entry.data;
+
+const sectionLabel = t(`section.${section === 'rider' ? 'rider' : 'eliminator'}`);
+const categoryLabel = t(`category.${category}`);
+
+const featured = d.buyLinks.find((l) => l.featured) ?? d.buyLinks[0];
+const siblings = (await getProductsIn(section, category)).filter((p) => p.id !== entry.id);
+
+const reviewCount = d.testimonials.length + 1;
+const bylineParts = [
+  `${reviewCount} ${t(reviewCount === 1 ? 'common.review' : 'common.reviews')}`,
+  d.verdict.km ? `${d.verdict.km.toLocaleString('pt-BR')} ${t('common.kmRidden')}` : null,
+].filter(Boolean);
+---
+
+<Layout title={d.title} description={d.verdict.text}>
+  <article class="max-w-[820px] mx-auto">
+    <Breadcrumb
+      trail={[
+        { label: sectionLabel, href: `${base}${section}/` },
+        { label: categoryLabel, href: `${base}${section}/${category}/` },
+        { label: d.title },
+      ]}
+    />
+
+    <p class="text-micro uppercase font-bold text-accent-text">
+      {categoryLabel} &middot; {sectionLabel}
+    </p>
+    <h1 class="text-h1 font-bold text-primary mt-3 mb-2.5">{d.title}</h1>
+    <p class="text-meta text-muted mb-6">{bylineParts.join(' · ')}</p>
+
+    <ProductImage
+      image={d.images[0]}
+      profile="hero"
+      sectionSlug={section}
+      categorySlug={category}
+      class="aspect-[16/10]"
+    />
+    {
+      d.images.length > 1 && (
+        <div class="grid grid-cols-5 gap-2 mt-2">
+          {d.images.slice(1, 6).map((img) => (
+            <ProductImage
+              image={img}
+              profile="thumb"
+              sectionSlug={section}
+              categorySlug={category}
+              class="aspect-[4/3]"
+            />
+          ))}
+        </div>
+      )
+    }
+
+    <blockquote class="verdict bg-surface border-l-[3px] border-accent rounded-card px-6 py-5 my-7">
+      <p class="text-verdict text-primary font-medium">&ldquo;{d.verdict.text}&rdquo;</p>
+      <footer class="text-meta text-muted mt-3">
+        &mdash; {d.verdict.by}
+        {d.verdict.bike && ` · ${d.verdict.bike}`}
+        {d.verdict.km && ` · ${d.verdict.km.toLocaleString('pt-BR')} ${t('common.km')}`}
+      </footer>
+    </blockquote>
+
+    <BuyLinks links={d.buyLinks} />
+
+    <div class="border-t border-line-subtle my-8"></div>
+
+    <section class="mb-8">
+      <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('product.fullReview')}</h2>
+      <div class="prose prose-neutral dark:prose-invert max-w-none prose-p:text-body-base prose-li:text-body-base prose-p:text-body prose-li:text-body">
+        <Content />
+      </div>
+    </section>
+
+    {
+      d.specs.length > 0 && (
+        <section class="mb-8">
+          <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('product.specs')}</h2>
+          <SpecTable specs={d.specs} />
+        </section>
+      )
+    }
+
+    {
+      d.adaptation.length > 0 && (
+        <section class="mb-8 bg-accent/[0.055] border border-accent/20 rounded-card px-6 py-5">
+          <h2 class="text-label uppercase font-bold text-accent-text mb-3">{t('product.adaptation')}</h2>
+          <AdaptationNotes notes={d.adaptation} />
+        </section>
+      )
+    }
+
+    {d.video && <div class="mb-8"><YoutubeEmbed url={d.video.url} creditPartner={d.video.creditPartner} /></div>}
+
+    {
+      d.testimonials.length > 0 && (
+        <section class="mb-8">
+          <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('product.testimonials')}</h2>
+          {d.testimonials.map((q) => (
+            <blockquote class="border-t border-line-subtle py-4">
+              <p class="text-body-sm text-body italic mb-2">&ldquo;{q.text}&rdquo;</p>
+              <footer class="font-mono text-[0.81rem] text-muted">
+                {q.by}
+                {q.bike && ` · ${q.bike}`}
+                {q.km && ` · ${q.km.toLocaleString('pt-BR')} ${t('common.km')}`}
+              </footer>
+            </blockquote>
+          ))}
+        </section>
+      )
+    }
+
+    <div class="mb-8"><MoreInfo moreInfo={d.moreInfo} /></div>
+
+    {
+      siblings.length > 0 && (
+        <section class="mb-8">
+          <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('product.related')}</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {siblings.slice(0, 3).map((p) => (
+              <ProductCard product={p} variant="compact" />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+
+  {d.buyLinks.length > 0 && (
+    <StickyBuyBar title={d.title} price={featured?.price} checkedAt={featured?.checkedAt} />
+  )}
+</Layout>

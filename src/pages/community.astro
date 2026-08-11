@@ -1,0 +1,59 @@
+---
+import { Image } from 'astro:assets';
+import Layout from '../layouts/Layout.astro';
+import { partners } from '../config/partners';
+import { t } from '../i18n/index';
+---
+
+<Layout title={t('nav.community')}>
+  <article class="max-w-[720px] mx-auto py-6">
+    <h1 class="text-h1 font-bold text-primary mb-6">Comunidade</h1>
+
+    <section class="mb-8">
+      <h2 class="text-label uppercase font-bold text-accent-text mb-3">Contribuir com uma análise</h2>
+      <p class="text-body-base text-body">
+        O RiderApproved só existe porque pilotos contam o que deu certo e o que não deu. Se você usou
+        um acessório por tempo suficiente pra ter opinião formada, manda pra gente: qual produto, em
+        qual moto, quantos quilômetros e o que você achou — o bom e o ruim.
+      </p>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-label uppercase font-bold text-accent-text mb-3">Indicar um produto</h2>
+      <p class="text-body-base text-body">
+        Tem algo que você queria ver testado? Manda a sugestão. Categorias vazias no site são
+        exatamente onde ainda falta gente pra contar como foi.
+      </p>
+    </section>
+
+    {
+      partners.length > 0 && (
+        <section class="partner-list mb-8">
+          <h2 class="text-label uppercase font-bold text-accent-text mb-3">Parceiros</h2>
+          {partners.map((p) => (
+            <a
+              href={p.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex items-center gap-4 bg-surface border border-line rounded-card px-5 py-4 mb-3 hover:border-accent transition-colors"
+            >
+              <Image src={p.logo} alt="" width={48} height={48} class="rounded-full shrink-0" />
+              <span>
+                <b class="block text-body-sm font-semibold text-primary">{p.name}</b>
+                <span class="block font-mono text-[0.78rem] text-muted">{p.handle}</span>
+                <span class="block text-meta text-body mt-1">{p.blurb}</span>
+              </span>
+            </a>
+          ))}
+        </section>
+      )
+    }
+
+    <section>
+      <h2 class="text-label uppercase font-bold text-accent-text mb-3">Onde encontrar a galera</h2>
+      <p class="text-body-base text-body">
+        Os pilotos que contribuem com o site se falam nos grupos da comunidade. Chega junto.
+      </p>
+    </section>
+  </article>
+</Layout>

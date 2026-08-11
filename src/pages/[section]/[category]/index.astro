@@ -1,0 +1,48 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import HazardRule from '../../../components/HazardRule.astro';
+import CategoryNav from '../../../components/CategoryNav.astro';
+import ProductCard from '../../../components/ProductCard.astro';
+import EmptyState from '../../../components/EmptyState.astro';
+import Breadcrumb from '../../../components/Breadcrumb.astro';
+import { catalog, getSection } from '../../../config/catalog';
+import { getProductsIn } from '../../../lib/catalog';
+import { t } from '../../../i18n/index';
+
+export function getStaticPaths() {
+  return catalog.flatMap((section) =>
+    section.categories.map((category) => ({
+      params: { section: section.slug, category: category.slug },
+    }))
+  );
+}
+
+const { section, category } = Astro.params;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const sectionLabel = t(getSection(section!)!.labelKey);
+const categoryLabel = t(`category.${category}`);
+const products = await getProductsIn(section!, category!);
+---
+
+<Layout title={`${categoryLabel} — ${sectionLabel}`}>
+  <Fragment slot="subnav">
+    <CategoryNav sectionSlug={section!} currentCategory={category} />
+  </Fragment>
+
+  <Breadcrumb trail={[{ label: sectionLabel, href: `${base}${section}/` }, { label: categoryLabel }]} />
+  <h1 class="text-h1 font-bold text-primary mb-6">{categoryLabel}</h1>
+
+  <HazardRule />
+
+  {
+    products.length === 0 ? (
+      <EmptyState sectionSlug={section!} categorySlug={category!} categoryLabel={categoryLabel} />
+    ) : (
+      <div>
+        {products.map((p) => (
+          <ProductCard product={p} variant="row" />
+        ))}
+      </div>
+    )
+  }
+</Layout>

@@ -1,0 +1,21 @@
+---
+interface Props {
+  specs: { label: string; value: string }[];
+}
+const { specs } = Astro.props;
+---
+
+{
+  specs.length > 0 && (
+    <table class="spec-table w-full font-mono">
+      <tbody>
+        {specs.map((s) => (
+          <tr class="border-b border-line-subtle">
+            <td class="py-3 text-micro uppercase text-muted">{s.label}</td>
+            <td class="py-3 text-[0.88rem] font-semibold text-primary text-right">{s.value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}

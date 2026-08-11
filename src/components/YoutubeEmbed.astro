@@ -1,0 +1,77 @@
+---
+import PartnerCredit from './PartnerCredit.astro';
+import { t } from '../i18n/index';
+
+interface Props {
+  url: string;
+  creditPartner?: string;
+}
+
+const { url, creditPartner } = Astro.props;
+
+let videoId = '';
+try {
+  const parsed = new URL(url);
+  videoId =
+    parsed.hostname === 'youtu.be' ? parsed.pathname.slice(1) : (parsed.searchParams.get('v') ?? '');
+} catch {
+  videoId = '';
+}
+---
+
+{
+  videoId && (
+    <section>
+      <h2 class="text-label uppercase font-bold text-accent-text mb-3.5">{t('product.video')}</h2>
+      <div
+        class="youtube-facade relative aspect-video w-full rounded-card overflow-hidden bg-surface border border-line cursor-pointer"
+        data-video-id={videoId}
+        role="button"
+        tabindex="0"
+        aria-label={t('product.video')}
+      >
+        <img
+          src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
+          alt=""
+          loading="lazy"
+          class="w-full h-full object-cover"
+        />
+        <span class="absolute inset-0 flex items-center justify-center">
+          <span class="w-16 h-16 rounded-full bg-accent flex items-center justify-center">
+            <span
+              class="ml-1 border-y-[12px] border-y-transparent border-l-[19px]"
+              style="border-left-color: var(--accent-ink)"
+            />
+          </span>
+        </span>
+      </div>
+      <PartnerCredit partnerKey={creditPartner} />
+    </section>
+  )
+}
+
+<script>
+  // Load the iframe only on interaction — no YouTube cookies for visitors who never press play.
+  function mount(el: HTMLElement) {
+    const id = el.dataset.videoId;
+    if (!id) return;
+    const frame = document.createElement('iframe');
+    frame.src = `https://www.youtube-nocookie.com/embed/${id}?autoplay=1`;
+    frame.title = 'YouTube';
+    frame.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; picture-in-picture';
+    frame.allowFullscreen = true;
+    frame.className = 'w-full h-full border-0';
+    el.replaceChildren(frame);
+    el.classList.remove('cursor-pointer');
+  }
+
+  document.querySelectorAll<HTMLElement>('.youtube-facade').forEach((el) => {
+    el.addEventListener('click', () => mount(el));
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        mount(el);
+      }
+    });
+  });
+</script>
